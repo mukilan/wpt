@@ -205,7 +205,7 @@ def _expand_test_code(code: str) -> str:
     code = re.sub(r'@assert throws (\S+_ERR) (.*);',
                   r'assert_throws_dom("\1", function() { \2; });', code)
 
-    code = re.sub(r'@assert throws (\S+Error) (.*);',
+    code = re.sub(r'@assert throws (\S+Error) (.*|[^;]*?);',
                   r'assert_throws_js(\1, function() { \2; });', code)
 
     code = re.sub(
