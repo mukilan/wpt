@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <script src="/resources/testharness.js"></script>
 <script src="/resources/testharnessreport.js"></script>
+<script src="../../../service-workers/service-worker/resources/test-helpers.sub.js"></script>
 <body>
 <script>
   function readableURL(url) {
@@ -87,6 +88,16 @@
     return i;
   }
 
+  function send(worker, data) {
+    return new Promise(resolve => {
+      navigator.serviceWorker.addEventListener('message', function onMsg(evt) {
+        navigator.serviceWorker.removeEventListener('message', onMsg);
+        resolve(evt);
+      });
+      worker.postMessage(data);
+    });
+  }
+
   // The following resources should not be blocked, as their URLs do not contain both a `\n` and `<`
   // character in the body of the URL.
   var should_load = [
@@ -144,4 +155,34 @@
       assert_img_not_loaded(t, i);
     }, readableURL(markup));
   });
+
+  block_requests = [
+    `<img src="resources/img?${rawNewline}${rawBrace}">`,
+    `<audio src="resources/audio?${rawNewline}${rawBrace}">`,
+    `<video src="resources/video?${rawNewline}${rawBrace}">`,
+    `<script src="resources/script?${rawNewline}${rawBrace}">`,
+    `<link rel="stylesheet" href="resources/style?${rawNewline}${rawBrace}">`,
+    `<iframe src="resources/iframe?${rawNewline}${rawBrace}">`,
+    `<embed src="resources/embed?${rawNewline}${rawBrace}">`,
+    `<object data="resources/object?${rawNewline}${rawBrace}">`,
+  ];
+
+  async_test(async t => {
+    let script = 'resources/service-worker.js';
+    let scope = 'resources/';
+    let result;
+    let iframe = document.body.appendChild(document.createElement('iframe'));
+    let registration = await service_worker_unregister_and_register(t, script,
+        scope);
+    t.add_cleanup(() => service_worker_unregister(t, scope));
+    await wait_for_state(t, registration.installing, 'activated');
+
+    for(html of block_requests) {
+      iframe.srcdoc = html;
+      result = await send(registration.active,
+          html.substring(html.search('\\/') + 1, html.search('\\?')));
+      assert_true(result);
+    }
+    t.done();
+  }, 'Blocks dangling markup requests');
 </script>
