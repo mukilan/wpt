@@ -1023,6 +1023,34 @@
          */
         get_virtual_sensor_information: function(sensor_type, context=null) {
             return window.test_driver_internal.get_virtual_sensor_information(sensor_type, context);
+        },
+
+        /**
+         * Save autofill address data.
+         *
+         * @param {HTMLFormElement} address_fields - An array containing address fields.
+         * @param {WindowProxy} [context=null] - Browsing context in which to
+         *                                       run the call, or null for the
+         *                                       current browsing context.
+         *
+         * @returns nothing
+         */
+        save_address_to_autofill: function(address_fields, context=null) {
+            return window.test_driver_internal.save_address_to_autofill(address_fields);
+        },
+
+        /**
+         * Expect saved autofill address data.
+         *
+         * @param {HTMLFormElement} address_fields - An array containing address fields.
+         * @param {WindowProxy} [context=null] - Browsing context in which to
+         *                                       run the call, or null for the
+         *                                       current browsing context.
+         *
+         * @returns Promise<bool>
+         */
+         expect_address_in_autofill: function(address_fields, context=null) {
+            return window.test_driver_internal.expect_address_in_autofill(address_fields);
         }
     };
 
@@ -1203,6 +1231,13 @@
 
         async get_virtual_sensor_information(sensor_type, context=null) {
             throw new Error("get_virtual_sensor_information() is not implemented by testdriver-vendor.js");
+        },
+        async save_address_to_autofill(address_fields, context=null) {
+            throw new Error("save_address_to_autofill() is not implemented by testdriver-vendor.js");
+        },
+        async expect_address_in_autofill(address_fields, context=null) {
+            throw new Error("expect_address_in_autofill() is not implemented by testdriver-vendor.js");
         }
+
     };
 })();
